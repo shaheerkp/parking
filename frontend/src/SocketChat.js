@@ -6,6 +6,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { useNavigate } from "react-router-dom";
+
+
 
 function SocketChat() {
   const [socket, setSocket] = useState(null);
@@ -15,12 +18,18 @@ function SocketChat() {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(null);
   const [confirm, setConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Do something with the form data (e.g., send it to a server)
     setConfirm(true);
   };
+
+  const handleLogout=()=>{
+    navigate(`/`)
+    localStorage.removeItem(`user`)
+  }
 
   const openForm = (i) => {
     setIndex(i);
@@ -41,6 +50,11 @@ function SocketChat() {
   };
 
   useEffect(() => {
+
+    let isAuth =localStorage.getItem(`user`)
+    if(!isAuth){
+      navigate(`/`)
+    }
     const soc = io.connect("http://localhost:5000");
     setSocket(soc);
     socket?.on("connect", () => {
@@ -48,7 +62,7 @@ function SocketChat() {
       socket.send("User connected!");
     });
     socket?.on("message", (data) => {
-      setData(data)
+      setData(data);
       let target = document.getElementById("messages");
       target.innerHTML = "";
       // data.forEach((element, i) => {
@@ -71,7 +85,7 @@ function SocketChat() {
   const handleSend = () => {
     socket?.send(`${"asdas"}: ${"message"}`);
     setMessage("");
-    setData([false])
+    setData([false]);
   };
 
   const [username, setUsername] = useState("");
@@ -83,9 +97,25 @@ function SocketChat() {
         id="messages"
         style={{ display: "flex", marginBottom: "10px" }}
       ></div>
-      <button id="sendBtn" onClick={handleSend}>
+      <button
+        id="sendBtn"
+        onClick={handleSend}
+        className="btn btn-secondary btn-block " 
+        style={{cursor:`pointer`,margin:10}}
+      >
         BOOK NOW
       </button>
+
+      <button
+        id="sendBtn"
+        onClick={handleLogout}
+        className="btn btn-secondary btn-block " 
+        style={{cursor:`pointer`}}
+      >
+        LOGOUT
+      </button>
+      
+      
       <div
         style={{
           display: "flex",
@@ -100,14 +130,14 @@ function SocketChat() {
             <div
               key={i}
               onClick={() => !ele && openForm(i)}
-              style={ 
+              style={
                 ele
                   ? { width: 50, height: 50, backgroundColor: "red" }
                   : {
                       width: 50,
                       height: 50,
                       backgroundColor: "green",
-                      cursor: "pointer", 
+                      cursor: "pointer",
                     }
               }
             >
@@ -172,10 +202,10 @@ function SocketChat() {
           <h5>Slot: {index}</h5>
           <button
             onClick={() => {
-              setName("")
-              setVehicleNo("")
+              setName("");
+              setVehicleNo("");
               setConfirm(false);
-              setOpen(false)
+              setOpen(false);
             }}
             type="submit"
             style={submitButtonStyle}
